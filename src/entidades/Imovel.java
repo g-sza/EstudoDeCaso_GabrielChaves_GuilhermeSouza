@@ -27,7 +27,7 @@ public abstract class Imovel implements Calculavel {
         return this.endereco;
     }
 
-    public void setEndereco(Endereco endereco) {
+    private void setEndereco(Endereco endereco) {
         if (endereco != null)
             this.endereco = endereco;
         else
@@ -38,7 +38,7 @@ public abstract class Imovel implements Calculavel {
         return this.valor;
     }
 
-    public void setValor(double valor) {
+    private void setValor(double valor) {
         if (valor > 0)
             this.valor = valor;
         else
@@ -49,7 +49,7 @@ public abstract class Imovel implements Calculavel {
         return this.area;
     }
 
-    public void setArea(double area) {
+    private void setArea(double area) {
         if (area > 0)
             this.area = area;
         else
