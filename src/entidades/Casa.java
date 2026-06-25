@@ -1,6 +1,7 @@
 package entidades;
 
 import excecoes.ExcecaoValidacao;
+import excecoes.ExcecaoValorInvalido;
 
 public class Casa extends Imovel{
     private int nrQuartos;
@@ -16,7 +17,8 @@ public class Casa extends Imovel{
 
     @Override
     public String toString(){
-        return String.format("CASA - Código: %d, Endereço: %s, Valor Final: R$%.2f, Área: %.2f, Quartos: %s, Garagem: %s, IPTU: R$%.2f", getCod(), getEndereco(), calcularValorFinal(), getArea(), this.nrQuartos, (this.garagem ? "Sim" : "Não"), this.iptu);
+        return String.format("CASA - Código: %d, Endereço: %s, Valor Final: R$%.2f, Área: %.2fm², Quartos: %s, Garagem: %s, IPTU: R$%.2f",
+            getCod(), getEndereco(), calcularValorFinal(), getArea(), this.nrQuartos, (this.garagem ? "Sim" : "Não"), this.iptu);
     }
     
     public int getNrQuartos(){
@@ -44,7 +46,7 @@ public class Casa extends Imovel{
     private void setIptu(double iptu){
         if (iptu >= 0){
             this.iptu = iptu;
-        } else throw new ExcecaoValidacao("Valor de IPTU Inválido.");
+        } else throw new ExcecaoValorInvalido("Valor de IPTU Inválido.");
     }
 
     @Override
