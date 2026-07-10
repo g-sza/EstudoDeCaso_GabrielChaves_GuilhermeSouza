@@ -5,6 +5,7 @@ import excecoes.ExcecaoImovelIndisponivel;
 import excecoes.ExcecaoValidacao;
 import excecoes.ExcecaoValorInvalido;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -93,6 +94,124 @@ public class ServicoImobiliaria {
     }
 
 
+    public List<Imovel> buscarImovelPorTipo(String tipo) {
+        if (tipo == null || tipo.isBlank()) {
+            throw new ExcecaoValidacao("Tipo de imóvel inválido.");
+        }
+
+        List<Imovel> encontrados = new ArrayList<>();
+        String tipoNormalizado = normalizarTexto(tipo);
+
+        for (Imovel imovel : imoveis) {
+            if (tipoNormalizado.equals("casa") && imovel instanceof Casa) {
+                encontrados.add(imovel);
+            } else if (tipoNormalizado.equals("apartamento") && imovel instanceof Apartamento) {
+                encontrados.add(imovel);
+            } else if (tipoNormalizado.equals("terreno") && imovel instanceof Terreno) {
+                encontrados.add(imovel);
+            } else if (imovel instanceof Terreno) {
+                Terreno terreno = (Terreno) imovel;
+
+                if (normalizarTexto(terreno.getTipo().name()).equals(tipoNormalizado)) {
+                    encontrados.add(imovel);
+                }
+            }
+        }
+
+        return encontrados;
+    }
+
+
+    public List<Imovel> buscarImovelPorStatus(String status) {
+        StatusImovel statusConvertido = converterStatus(status);
+        List<Imovel> encontrados = new ArrayList<>();
+
+        for (Imovel imovel : imoveis) {
+            if (imovel.getStatus() == statusConvertido) {
+                encontrados.add(imovel);
+            }
+        }
+
+        return encontrados;
+    }
+
+
+    public Cliente buscarClientePorCpf(String cpf) {
+        String cpfLimpo = limparCpf(cpf);
+
+        for (Cliente cliente : clientes) {
+            if (cliente.getCpf().equals(cpfLimpo)) {
+                return cliente;
+            }
+        }
+
+        throw new ExcecaoValidacao("Cliente não encontrado.");
+    }
+
+
+    public Imovel buscarImovelPorCodigo(int codigo) {
+        for (Imovel imovel : imoveis) {
+            if (imovel.getCod() == codigo) {
+                return imovel;
+            }
+        }
+
+        throw new ExcecaoValidacao("Imóvel não encontrado.");
+    }
+
+
+    public void gerarRelatorios() {
+        int qtdDisponiveis = 0;
+        int qtdVendidos = 0;
+        int qtdAlugados = 0;
+
+        double totalVendas = 0;
+        double totalAlugueis = 0;
+
+        Imovel imovelMaisCaro = null;
+
+        for (Imovel imovel : imoveis) {
+            if (imovel.getStatus() == StatusImovel.Disponivel) {
+                qtdDisponiveis++;
+            } else if (imovel.getStatus() == StatusImovel.Vendido) {
+                qtdVendidos++;
+            } else if (imovel.getStatus() == StatusImovel.Alugado) {
+                qtdAlugados++;
+            }
+
+            if (imovelMaisCaro == null ||
+                    imovel.calcularValorFinal() > imovelMaisCaro.calcularValorFinal()) {
+                imovelMaisCaro = imovel;
+            }
+        }
+
+        for (Contrato contrato : contratos) {
+            if ("Venda".equals(contrato.getTipoContrato())) {
+                totalVendas += contrato.getValorAcordado();
+            } else if ("Aluguel".equals(contrato.getTipoContrato())) {
+                totalAlugueis += contrato.getValorAcordado();
+            }
+        }
+
+        System.out.println("RELATÓRIO DA IMOBILIÁRIA");
+        System.out.println("Quantidade de imóveis disponíveis: " + qtdDisponiveis);
+        System.out.println("Quantidade de imóveis vendidos: " + qtdVendidos);
+        System.out.printf("Total arrecadado com imóveis vendidos: R$%.2f%n", totalVendas);
+        System.out.println("Quantidade de imóveis alugados: " + qtdAlugados);
+        System.out.printf("Total arrecadado com aluguéis: R$%.2f%n", totalAlugueis);
+
+        if (imovelMaisCaro == null) {
+            System.out.println("Imóvel mais caro: nenhum imóvel cadastrado.");
+        } else {
+            System.out.println("Imóvel mais caro:");
+            System.out.println(imovelMaisCaro);
+        }
+    }
+
+
+
+
+
     private void validarImovelECliente(Imovel imovel, Cliente cliente) {
         if (imovel == null) {
             throw new ExcecaoValidacao("Imóvel inválido.");
@@ -110,4 +229,43 @@ public class ServicoImobiliaria {
             throw new ExcecaoValidacao("Cliente não cadastrado.");
         }
     }
+
+    private StatusImovel converterStatus(String status) {
+        String statusNormalizado = normalizarTexto(status);
+
+        if (statusNormalizado.equals("disponivel")) {
+            return StatusImovel.Disponivel;
+        }
+
+        if (statusNormalizado.equals("alugado")) {
+            return StatusImovel.Alugado;
+        }
+
+        if (statusNormalizado.equals("vendido")) {
+            return StatusImovel.Vendido;
+        }
+
+        throw new ExcecaoValidacao("Status inválido. Use Disponivel, Alugado ou Vendido.");
+    }
+
+    private String limparCpf(String cpf) {
+        if (cpf == null) {
+            return "";
+        }
+
+        return cpf.replaceAll("[^0-9]", "");
+    }
+
+    private String normalizarTexto(String texto) {
+        if (texto == null) {
+            return "";
+        }
+
+        String semAcento = Normalizer
+                .normalize(texto, Normalizer.Form.NFD)
+                .replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
+
+        return semAcento.trim().toLowerCase();
+    }
 }
+
