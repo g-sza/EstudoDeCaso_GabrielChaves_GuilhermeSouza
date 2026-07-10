@@ -22,6 +22,10 @@ public class ServicoImobiliaria {
         this.contratos = contratos;
     }
 
+    public ServicoImobiliaria() {
+
+    }
+
     public void cadastrarClientes(Cliente c) {
         if (c == null) {
             throw new IllegalArgumentException("O Cliente é inválido.");
