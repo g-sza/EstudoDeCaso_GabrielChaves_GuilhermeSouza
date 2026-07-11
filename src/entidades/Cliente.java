@@ -32,7 +32,7 @@ public class Cliente {
 
     public void setNome(String nome) {
         this.nome = nome;
-        if (nome.isBlank() || nome == null ) {
+        if (nome == null || nome.isBlank() ) {
             throw new ExcecaoValidacao("Nome do cliente não pode estar vazio.");
         }
     }
@@ -60,7 +60,7 @@ public class Cliente {
 
     public void setEmail(String email) {
         this.email = email;
-        if (email.isBlank() || email == null || !email.contains("@")) {
+        if (email == null || email.isBlank() || !email.contains("@")) {
             throw new ExcecaoValidacao("E-mail inválido.");
         }
 
